@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nekopara Onitama</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #ffebf5;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-image: url('/api/placeholder/1200/800');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #5a3a22;
+    }
+    
+    h1 {
+      text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+      color: #e85a9e;
+      margin-bottom: 5px;
+    }
+    
+    .subtitle {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-style: italic;
+      color: #8a5a7a;
+    }
+    
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      background-color: rgba(255, 255, 255, 0.85);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .player-info {
+      display: flex;
+      justify-content: space-between;
+      width: 500px;
+      margin-bottom: 10px;
+    }
+    
+    .player {
+      text-align: center;
+      padding: 10px;
+      border-radius: 10px;
+      width: 200px;
+      font-weight: bold;
+    }
+    
+    .player-pink {
+      background-color: #ffcce5;
+      color: #d43790;
+    }
+    
+    .player-blue {
+      background-color: #cce5ff;
+      color: #0066cc;
+    }
+    
+    .active-player {
+      box-shadow: 0 0 10px 3px rgba(255, 215, 0, 0.7);
+    }
+    
+    .board {
+      display: grid;
+      grid-template-columns: repeat(5, 80px);
+      grid-template-rows: repeat(5, 80px);
+      gap: 5px;
+      margin: 20px 0;
+    }
+    
+    .cell {
+      width: 80px;
+      height: 80px;
+      background-color: #f5d7b9;
+      border: 2px solid #d4ae7a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border-radius: 8px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    
+    .cell:hover {
+      background-color: #f9e7d4;
+    }
+    
+    .cell.highlighted {
+      background-color: #ffd17a;
+      box-shadow: 0 0 8px rgba(255, 180, 0, 0.8);
+    }
+    
+    .cell.temple-pink {
+      background-color: #ffd6e7;
+    }
+    
+    .cell.temple-blue {
+      background-color: #d6e7ff;
+    }
+    
+    .piece {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 28px;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    
+    .piece:hover {
+      transform: scale(1.1);
+    }
+    
+    .piece.master-pink {
+      background-color: #ff6bb3;
+      border: 3px solid #ff3399;
+    }
+    
+    .piece.student-pink {
+      background-color: #ff8bc8;
+      border: 3px solid #ff6bb3;
+    }
+    
+    .piece.master-blue {
+      background-color: #66a3ff;
+      border: 3px solid #3385ff;
+    }
+    
+    .piece.student-blue {
+      background-color: #99c2ff;
+      border: 3px solid #66a3ff;
+    }
+    
+    .piece.selected {
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.9);
+      transform: scale(1.1);
+    }
+    
+    .cards-area {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 20px;
+    }
+    
+    .player-cards {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .center-card {
+      margin: 0 20px;
+    }
+    
+    .card {
+      width: 100px;
+      height: 150px;
+      background-color: white;
+      border-radius: 10px;
+      padding: 5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      position: relative;
+      border: 2px solid #d4ae7a;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .card.selected-card {
+      border: 2px solid gold;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+    }
+    
+    .card-title {
+      font-size: 12px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 5px;
+      width: 100%;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 3px;
+      color: #5a3a22;
+    }
+    
+    .cat-image {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 5px;
+      border-radius: 50%;
+      background-color: #ffebf5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+    }
+    
+    .movement-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 16px);
+      grid-template-rows: repeat(5, 16px);
+      gap: 2px;
+      margin-top: 5px;
+    }
+    
+    .move-cell {
+      width: 16px;
+      height: 16px;
+      background-color: #f0f0f0;
+      border-radius: 3px;
+    }
+    
+    .move-cell.pawn {
+      background-color: #aaddee;
+    }
+    
+    .move-cell.possible {
+      background-color: #aaffaa;
+    }
+    
+    .game-status {
+      margin-top: 20px;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 10px;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .controls {
+      margin-top: 20px;
+    }
+    
+    button {
+      background-color: #ff8bc8;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s ease;
+      margin: 0 10px;
+    }
+    
+    button:hover {
+      background-color: #ff6bb3;
+      transform: scale(1.05);
+    }
+    
+    .winner-message {
+      font-size: 24px;
+      font-weight: bold;
+      color: #e85a9e;
+      margin-top: 20px;
+      text-align: center;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Nekopara Onitama</h1>
+  <p class="subtitle">A Catgirl-Themed Strategy Game</p>
+  
+  <div class="game-container">
+    <div class="player-info">
+      <div id="player-blue" class="player player-blue">Blue Café</div>
+      <div id="player-pink" class="player player-pink active-player">Pink Café</div>
+    </div>
+    
+    <div class="board" id="game-board"></div>
+    
+    <div class="cards-area">
+      <div id="blue-cards" class="player-cards"></div>
+      <div id="center-card" class="center-card"></div>
+      <div id="pink-cards" class="player-cards"></div>
+    </div>
+    
+    <div id="game-status" class="game-status">
+      Pink Café's turn. Select a piece and movement card.
+    </div>
+    
+    <div class="controls">
+      <button id="new-game-btn">New Game</button>
+      <button id="rules-btn">Show Rules</button>
+    </div>
+  </div>
+  
+  <script>
+    // Game Constants and Variables
+    const BOARD_SIZE = 5;
+    const PINK = 'pink';
+    const BLUE = 'blue';
+    
+    // Card definitions with nekopara themes
+    const CARDS = [
+      {
+        name: "Vanilla",
+        emoji: "😺",
+        moves: [[-2, 0], [1, -1], [1, 1]]
+      },
+      {
+        name: "Chocola",
+        emoji: "🐱",
+        moves: [[-1, -1], [-1, 1], [1, 0], [2, 0]]
+      },
+      {
+        name: "Coconut",
+        emoji: "😸",
+        moves: [[-1, -2], [-1, 2], [1, -1], [1, 1]]
+      },
+      {
+        name: "Azuki",
+        emoji: "😼",
+        moves: [[-1, 0], [0, -1], [0, 1], [1, 0]]
+      },
+      {
+        name: "Maple",
+        emoji: "😽",
+        moves: [[-1, -1], [-1, 1], [0, 2], [1, 0]]
+      },
+      {
+        name: "Cinnamon",
+        emoji: "🙀",
+        moves: [[-2, -1], [-2, 1], [1, -1], [1, 1]]
+      },
+      {
+        name: "Milk",
+        emoji: "😻",
+        moves: [[-1, 0], [0, -2], [0, 2], [1, 0]]
+      },
+      {
+        name: "Shigure",
+        emoji: "😹",
+        moves: [[-2, -1], [-1, -2], [1, 2], [2, 1]]
+      }
+    ];
+    
+    let gameState = {
+      currentPlayer: PINK,
+      selectedPiece: null,
+      selectedCard: null,
+      pinkCards: [],
+      blueCards: [],
+      centerCard: null,
+      board: Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(null)),
+      gameOver: false,
+      winner: null
+    };
+    
+    // Initialize the game
+    function initGame() {
+      const gameBoard = document.getElementById('game-board');
+      gameBoard.innerHTML = '';
+      
+      // Clear game state
+      gameState = {
+        currentPlayer: PINK,
+        selectedPiece: null,
+        selectedCard: null,
+        pinkCards: [],
+        blueCards: [],
+        centerCard: null,
+        board: Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(null)),
+        gameOver: false,
+        winner: null
+      };
+      
+      // Create the board
+      for (let row = 0; row < BOARD_SIZE; row++) {
+        for (let col = 0; col < BOARD_SIZE; col++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.row = row;
+          cell.dataset.col = col;
+          
+          // Add temple classes
+          if (row === 0 && col === 2) {
+            cell.classList.add('temple-blue');
+          } else if (row === 4 && col === 2) {
+            cell.classList.add('temple-pink');
+          }
+          
+          cell.addEventListener('click', () => handleCellClick(row, col));
+          gameBoard.appendChild(cell);
+        }
+      }
+      
+      // Set up initial pieces
+      // Blue pieces at the top row
+      for (let col = 0; col < BOARD_SIZE; col++) {
+        const pieceType = col === 2 ? 'master' : 'student';
+        gameState.board[0][col] = { player: BLUE, type: pieceType };
+      }
+      
+      // Pink pieces at the bottom row
+      for (let col = 0; col < BOARD_SIZE; col++) {
+        const pieceType = col === 2 ? 'master' : 'student';
+        gameState.board[4][col] = { player: PINK, type: pieceType };
+      }
+      
+      // Deal cards
+      dealCards();
+      
+      // Render the board
+      renderBoard();
+      renderCards();
+      updateGameStatus();
+      updatePlayerIndicator();
+    }
+    
+    // Deal random cards
+    function dealCards() {
+      // Shuffle the cards
+      const shuffledCards = [...CARDS].sort(() => Math.random() - 0.5);
+      
+      // Deal cards to players
+      gameState.pinkCards = shuffledCards.slice(0, 2);
+      gameState.blueCards = shuffledCards.slice(2, 4);
+      gameState.centerCard = shuffledCards[4];
+    }
+    
+    // Render board with pieces
+    function renderBoard() {
+      for (let row = 0; row < BOARD_SIZE; row++) {
+        for (let col = 0; col < BOARD_SIZE; col++) {
+          const piece = gameState.board[row][col];
+          const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+          
+          // Clear cell
+          while (cell.firstChild) {
+            cell.removeChild(cell.firstChild);
+          }
+          
+          // Add piece if exists
+          if (piece) {
+            const pieceElement = document.createElement('div');
+            pieceElement.className = `piece ${piece.type}-${piece.player}`;
+            
+            // Add correct emoji for each piece type
+            if (piece.type === 'master') {
+              pieceElement.innerText = piece.player === PINK ? '👑' : '👑';
+            } else {
+              pieceElement.innerText = piece.player === PINK ? '🐾' : '🐾';
+            }
+            
+            // Add selected class if this piece is selected
+            if (gameState.selectedPiece && 
+                gameState.selectedPiece.row === row && 
+                gameState.selectedPiece.col === col) {
+              pieceElement.classList.add('selected');
+            }
+            
+            cell.appendChild(pieceElement);
+          }
+          
+          // Remove highlight
+          cell.classList.remove('highlighted');
+        }
+      }
+      
+      // Add highlights for possible moves if a piece and card are selected
+      if (gameState.selectedPiece && gameState.selectedCard) {
+        const possibleMoves = getValidMoves(
+          gameState.selectedPiece.row,
+          gameState.selectedPiece.col,
+          gameState.selectedCard
+        );
+        
+        for (const move of possibleMoves) {
+          const cell = document.querySelector(
+            `.cell[data-row="${move.row}"][data-col="${move.col}"]`
+          );
+          cell.classList.add('highlighted');
+        }
+      }
+    }
+    
+    // Render cards
+    function renderCards() {
+      // Render pink player cards
+      const pinkCardsContainer = document.getElementById('pink-cards');
+      pinkCardsContainer.innerHTML = '';
+      gameState.pinkCards.forEach((card, index) => {
+        const cardElement = createCardElement(card, PINK, index);
+        pinkCardsContainer.appendChild(cardElement);
+      });
+      
+      // Render blue player cards
+      const blueCardsContainer = document.getElementById('blue-cards');
+      blueCardsContainer.innerHTML = '';
+      gameState.blueCards.forEach((card, index) => {
+        const cardElement = createCardElement(card, BLUE, index);
+        blueCardsContainer.appendChild(cardElement);
+      });
+      
+      // Render center card
+      const centerCardContainer = document.getElementById('center-card');
+      centerCardContainer.innerHTML = '';
+      if (gameState.centerCard) {
+        const cardElement = createCardElement(gameState.centerCard, 'center');
+        centerCardContainer.appendChild(cardElement);
+      }
+    }
+    
+    // Create a card element
+    function createCardElement(card, owner, index = 0) {
+      const cardElement = document.createElement('div');
+      cardElement.className = 'card';
+      if (gameState.selectedCard === card && gameState.currentPlayer === owner) {
+        cardElement.classList.add('selected-card');
+      }
+      
+      const titleElement = document.createElement('div');
+      titleElement.className = 'card-title';
+      titleElement.textContent = card.name;
+      cardElement.appendChild(titleElement);
+      
+      const catImageElement = document.createElement('div');
+      catImageElement.className = 'cat-image';
+      catImageElement.textContent = card.emoji;
+      cardElement.appendChild(catImageElement);
+      
+      const movementGrid = document.createElement('div');
+      movementGrid.className = 'movement-grid';
+      
+      // Create the 5x5 grid for moves
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          const moveCell = document.createElement('div');
+          moveCell.className = 'move-cell';
+          
+          // Center cell (represents the pawn)
+          if (r === 2 && c === 2) {
+            moveCell.classList.add('pawn');
+          }
+          
+          // Check if this cell is a possible move
+          const isMove = card.moves.some(([dr, dc]) => {
+            // For blue player, invert the moves
+            let adjustedDr = dr;
+            let adjustedDc = dc;
+            
+            if (owner === BLUE) {
+              adjustedDr = -dr;
+              adjustedDc = -dc;
+            }
+            
+            return r === 2 + adjustedDr && c === 2 + adjustedDc;
+          });
+          
+          if (isMove) {
+            moveCell.classList.add('possible');
+          }
+          
+          movementGrid.appendChild(moveCell);
+        }
+      }
+      
+      cardElement.appendChild(movementGrid);
+      
+      // Add click event only if card belongs to current player
+      if (owner === gameState.currentPlayer) {
+        cardElement.addEventListener('click', () => handleCardClick(card, index));
+      }
+      
+      return cardElement;
+    }
+    
+    // Handle card click
+    function handleCardClick(card, index) {
+      if (gameState.gameOver) return;
+      if (gameState.currentPlayer === PINK) {
+        if (!gameState.pinkCards.includes(card)) return;
+      } else {
+        if (!gameState.blueCards.includes(card)) return;
+      }
+      
+      gameState.selectedCard = card;
+      renderCards();
+      renderBoard(); // Re-render to show possible moves if a piece is selected
+    }
+    
+    // Handle cell click
+    function handleCellClick(row, col) {
+      if (gameState.gameOver) return;
+      
+      const piece = gameState.board[row][col];
+      
+      // If no piece is selected yet and the cell contains a piece of the current player
+      if (!gameState.selectedPiece && piece && piece.player === gameState.currentPlayer) {
+        gameState.selectedPiece = { row, col };
+        renderBoard();
+        return;
+      }
+      
+      // If a piece is already selected
+      if (gameState.selectedPiece) {
+        // If clicking on another piece of the same player, select that piece instead
+        if (piece && piece.player === gameState.currentPlayer) {
+          gameState.selectedPiece = { row, col };
+          renderBoard();
+          return;
+        }
+        
+        // If a card is also selected, try to make a move
+        if (gameState.selectedCard) {
+          const validMoves = getValidMoves(
+            gameState.selectedPiece.row, 
+            gameState.selectedPiece.col, 
+            gameState.selectedCard
+          );
+          
+          const isValidMove = validMoves.some(move => move.row === row && move.col === col);
+          
+          if (isValidMove) {
+            makeMove(row, col);
+          }
+        }
+      }
+    }
+    
+    // Get valid moves for a piece and card
+    function getValidMoves(row, col, card) {
+      const validMoves = [];
+      const piece = gameState.board[row][col];
+      
+      if (!piece || piece.player !== gameState.currentPlayer) {
+        return validMoves;
+      }
+      
+      card.moves.forEach(([dr, dc]) => {
+        // Invert moves for blue player
+        let adjustedDr = dr;
+        let adjustedDc = dc;
+        
+        if (piece.player === BLUE) {
+          adjustedDr = -dr;
+          adjustedDc = -dc;
+        }
+        
+        const newRow = row + adjustedDr;
+        const newCol = col + adjustedDc;
+        
+        // Check if the move is within the board
+        if (newRow >= 0 && newRow < BOARD_SIZE && newCol >= 0 && newCol < BOARD_SIZE) {
+          // Check if the destination is empty or has an opponent's piece
+          const targetPiece = gameState.board[newRow][newCol];
+          if (!targetPiece || targetPiece.player !== piece.player) {
+            validMoves.push({ row: newRow, col: newCol });
+          }
+        }
+      });
+      
+      return validMoves;
+    }
+    
+    // Make a move
+    function makeMove(row, col) {
+      const { selectedPiece, selectedCard, currentPlayer } = gameState;
+      const piece = gameState.board[selectedPiece.row][selectedPiece.col];
+      const targetPiece = gameState.board[row][col];
+      
+      // Move the piece
+      gameState.board[row][col] = piece;
+      gameState.board[selectedPiece.row][selectedPiece.col] = null;
+      
+      // Swap the selected card with the center card
+      if (currentPlayer === PINK) {
+        const cardIndex = gameState.pinkCards.indexOf(selectedCard);
+        gameState.pinkCards[cardIndex] = gameState.centerCard;
+        gameState.centerCard = selectedCard;
+      } else {
+        const cardIndex = gameState.blueCards.indexOf(selectedCard);
+        gameState.blueCards[cardIndex] = gameState.centerCard;
+        gameState.centerCard = selectedCard;
+      }
+      
+      // Check for win conditions
+      checkWinConditions(row, col, targetPiece);
+      
+      // Clear selections
+      gameState.selectedPiece = null;
+      gameState.selectedCard = null;
+      
+      // Switch player if game is not over
+      if (!gameState.gameOver) {
+        gameState.currentPlayer = currentPlayer === PINK ? BLUE : PINK;
+      }
+      
+      // Update displays
+      renderBoard();
+      renderCards();
+      updateGameStatus();
+      updatePlayerIndicator();
+    }
+    
+    // Check win conditions
+    function checkWinConditions(row, col, capturedPiece) {
+      const currentPlayer = gameState.currentPlayer;
+      
+      // Win by capturing opponent's master
+      if (capturedPiece && capturedPiece.type === 'master') {
+        gameState.gameOver = true;
+        gameState.winner = currentPlayer;
+        return;
+      }
+      
+      // Win by reaching opponent's temple
+      const piece = gameState.board[row][col];
+      if (piece.type === 'master') {
+        if (currentPlayer === PINK && row === 0 && col === 2) {
+          gameState.gameOver = true;
+          gameState.winner = PINK;
+        } else if (currentPlayer === BLUE && row === 4 && col === 2) {
+          gameState.gameOver = true;
+          gameState.winner = BLUE;
+        }
+      }
+    }
+    
+    // Update game status display
+    function updateGameStatus() {
+      const statusElement = document.getElementById('game-status');
+      
+      if (gameState.gameOver) {
+        statusElement.innerHTML = '';
+        const winnerMessage = document.createElement('div');
+        winnerMessage.className = 'winner-message';
+        winnerMessage.textContent = `${gameState.winner === PINK ? 'Pink' : 'Blue'} Café wins! 🎉`;
+        statusElement.appendChild(winnerMessage);
+      } else {
+        const playerName = gameState.currentPlayer === PINK ? 'Pink' : 'Blue';
+        statusElement.textContent = `${playerName} Café's turn. Select a piece and movement card.`;
+      }
+    }
+    
+    // Update player indicator
+    function updatePlayerIndicator() {
+      const pinkPlayer = document.getElementById('player-pink');
+      const bluePlayer = document.getElementById('player-blue');
+      
+      pinkPlayer.classList.toggle('active-player', gameState.currentPlayer === PINK);
+      bluePlayer.classList.toggle('active-player', gameState.currentPlayer === BLUE);
+    }
+    
+    // Show rules
+    function showRules() {
+      alert(`Nekopara Onitama Rules:
+
+1. Goal: Capture your opponent's Master or move your Master to the opponent's Temple.
+
+2. Each player has 2 movement cards showing possible moves.
+
+3. On your turn:
+   - Select one of your pieces
+   - Select one of your movement cards
+   - Move your piece according to that card
+
+4. After moving, your used card goes to the center and you take the center card.
+
+5. Pink moves first.
+
+6. Pink pieces move from bottom to top, Blue pieces from top to bottom.
+
+Good luck and have fun with your catgirls! 😺`);
+    }
+    
+    // Event listeners
+    document.getElementById('new-game-btn').addEventListener('click', initGame);
+    document.getElementById('rules-btn').addEventListener('click', showRules);
+    
+    // Initialize the game
+    initGame();
+  </script>
+</body>
+</html>
